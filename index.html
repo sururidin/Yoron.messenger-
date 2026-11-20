@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Yoron</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { margin: 0; background: #030714; color: white; font-family: sans-serif; display: flex; justify-content: center; }
+        #app { width: 100%; max-width: 460px; height: 100vh; background: radial-gradient(circle at top, #0a1633 0%, #030714 100%); display: flex; flex-direction: column; }
+        .header { display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.05); border-bottom: 1px solid #1a2a4a; }
+        .balance { background: #1e293b; padding: 5px 10px; border-radius: 15px; color: #38bdf8; font-weight: bold; border: 1px solid #38bdf8; }
+        .content { flex: 1; padding: 20px; overflow-y: auto; }
+        .chat-item { background: #0f1c3f; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #38bdf8; }
+        .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .gift-card { background: #0f1c3f; border: 1px solid #2a3f66; border-radius: 10px; padding: 10px; text-align: center; }
+        .nav { display: flex; justify-content: space-around; padding: 15px; background: #060f24; border-top: 1px solid #1a2a4a; }
+        .nav div { text-align: center; font-size: 12px; color: #a0aec0; cursor: pointer; }
+        .nav div.active { color: #38bdf8; }
+        .btn { background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%); color: white; border: none; padding: 15px; border-radius: 20px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="header">
+        <div style="font-weight: bold; font-size: 20px; color: #38bdf8;">Yoron</div>
+        <div class="balance">💎 0 Crystal</div>
+    </div>
+    
+    <div id="screen-chats" class="content">
+        <h3>Чаты</h3>
+        <div class="chat-item"><div class="avatar"></div><div><b>@ai</b><br><span style="font-size:12px; color:#a0aec0;">ИИ-помощник</span></div></div>
+        <div class="chat-item"><div class="avatar" style="background:#fbbf24;"></div><div><b>@all</b><br><span style="font-size:12px; color:#a0aec0;">Общий чат</span></div></div>
+    </div>
+
+    <div id="screen-gifts" class="content" style="display:none;">
+        <h3>Магазин подарков</h3>
+        <div class="gift-grid">
+            <div class="gift-card"><div style="font-size:30px;">❤️</div>Сердце<br>50 💎</div>
+            <div class="gift-card"><div style="font-size:30px;">🌹</div>Роза<br>120 💎</div>
+            <div class="gift-card"><div style="font-size:30px;">👑</div>Корона<br>250 💎</div>
+        </div>
+    </div>
+
+    <div id="screen-profile" class="content" style="display:none;">
+        <h3>Профиль</h3>
+        <p>@username</p>
+        <button class="btn">Ввести админ-ключ</button>
+        <button class="btn" style="background:#1e293b;">Сменить аккаунт</button>
+    </div>
+
+    <div class="nav">
+        <div id="nav-chats" class="active" onclick="switchTab('chats')">💬<br>Чаты</div>
+        <div id="nav-gifts" onclick="switchTab('gifts')">🎁<br>Подарки</div>
+        <div id="nav-collection" onclick="switchTab('collection')">💎<br>Коллекция</div>
+        <div id="nav-profile" onclick="switchTab('profile')">👤<br>Профиль</div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tab) {
+        document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.nav div').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('screen-' + tab).style.display = 'block';
+        document.getElementById('nav-' + tab).classList.add('active');
+    }
+</script>
+</body>
+</html>
