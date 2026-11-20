@@ -5,67 +5,228 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Yoron</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; background: #030714; color: white; font-family: sans-serif; display: flex; justify-content: center; }
-        #app { width: 100%; max-width: 460px; height: 100vh; background: radial-gradient(circle at top, #0a1633 0%, #030714 100%); display: flex; flex-direction: column; }
-        .header { display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.05); border-bottom: 1px solid #1a2a4a; }
-        .balance { background: #1e293b; padding: 5px 10px; border-radius: 15px; color: #38bdf8; font-weight: bold; border: 1px solid #38bdf8; }
-        .content { flex: 1; padding: 20px; overflow-y: auto; }
-        .chat-item { background: #0f1c3f; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #38bdf8; }
-        .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .gift-card { background: #0f1c3f; border: 1px solid #2a3f66; border-radius: 10px; padding: 10px; text-align: center; }
-        .nav { display: flex; justify-content: space-around; padding: 15px; background: #060f24; border-top: 1px solid #1a2a4a; }
-        .nav div { text-align: center; font-size: 12px; color: #a0aec0; cursor: pointer; }
-        .nav div.active { color: #38bdf8; }
-        .btn { background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%); color: white; border: none; padding: 15px; border-radius: 20px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        :root {
+            --bg-dark: #030714;
+            --bg-card: #0a1228;
+            --border-blue: #1a2f5c;
+            --accent-blue: #38bdf8;
+            --accent-purple: #8b5cf6;
+            --gold: #fbbf24;
+            --text-main: #ffffff;
+            --text-muted: #8b98b8;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        #app { width: 100%; max-width: 460px; height: 100%; display: flex; flex-direction: column; background: radial-gradient(circle at top left, #0a1a3a 0%, #030714 60%); position: relative; }
+        
+        /* Шапка */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(3, 7, 20, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-blue); z-index: 10; }
+        .logo { font-weight: 800; font-size: 22px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .logo span { color: var(--accent-blue); text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+        .balance { background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 20px; color: var(--accent-blue); font-weight: 600; border: 1px solid rgba(56, 189, 248, 0.3); display: flex; align-items: center; gap: 5px; box-shadow: 0 0 15px rgba(56, 189, 248, 0.1); }
+        
+        /* Контент */
+        .content { flex: 1; overflow-y: auto; padding: 20px; display: none; }
+        .content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        h2 { font-size: 24px; margin-top: 0; margin-bottom: 20px; font-weight: 800; }
+        
+        /* Карточки чатов */
+        .chat-item { background: var(--bg-card); padding: 15px; border-radius: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-blue); transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
+        .chat-item:hover { transform: translateY(-2px); border-color: var(--accent-blue); }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; background: linear-gradient(135deg, var(--border-blue), var(--accent-blue)); }
+        .chat-info { display: flex; flex-direction: column; }
+        .chat-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+        .chat-desc { color: var(--text-muted); font-size: 13px; }
+
+        /* Навигация */
+        .nav { display: flex; justify-content: space-around; padding: 15px 10px 25px; background: rgba(6, 15, 36, 0.95); backdrop-filter: blur(15px); border-top: 1px solid var(--border-blue); z-index: 10; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; width: 60px; }
+        .nav-item .icon { font-size: 22px; transition: 0.2s; }
+        .nav-item.active { color: var(--accent-blue); }
+        .nav-item.active .icon { filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6)); transform: scale(1.1); }
+
+        /* Чат */
+        #messagesBox { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px; background: var(--bg-card); border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border-blue); min-height: 50vh; }
+        .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .msg.mine { background: var(--accent-blue); color: #000; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.theirs { background: #1e293b; color: white; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-sender { font-size: 10px; font-weight: bold; margin-bottom: 3px; opacity: 0.7; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input { flex: 1; padding: 15px; border-radius: 15px; background: var(--bg-card); border: 1px solid var(--border-blue); color: white; outline: none; }
+        .send-btn { background: var(--accent-blue); color: black; border: none; padding: 0 20px; border-radius: 15px; font-weight: bold; font-size: 20px; cursor: pointer; }
+
+        /* Подарки */
+        .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .gift-card { background: var(--bg-card); border: 1px solid var(--border-blue); border-radius: 16px; padding: 15px 10px; text-align: center; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.2s; }
+        .gift-card:hover { border-color: var(--accent-blue); box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
+        .gift-icon { font-size: 40px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
+        .gift-name { font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.2; }
+        .gift-price { font-size: 12px; color: var(--accent-blue); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .badge { position: absolute; top: 10px; right: -25px; transform: rotate(45deg); font-size: 9px; font-weight: 800; padding: 3px 30px; text-transform: uppercase; }
+        .badge.market { background: #22c55e; color: white; }
     </style>
 </head>
 <body>
 <div id="app">
     <div class="header">
-        <div style="font-weight: bold; font-size: 20px; color: #38bdf8;">Yoron</div>
-        <div class="balance">💎 0 Crystal</div>
+        <div class="logo">Yoron<span>.</span></div>
+        <div class="balance">💎 <span id="balanceDisplay">0</span> Crystal</div>
     </div>
     
-    <div id="screen-chats" class="content">
-        <h3>Чаты</h3>
-        <div class="chat-item"><div class="avatar"></div><div><b>@ai</b><br><span style="font-size:12px; color:#a0aec0;">ИИ-помощник</span></div></div>
-        <div class="chat-item"><div class="avatar" style="background:#fbbf24;"></div><div><b>@all</b><br><span style="font-size:12px; color:#a0aec0;">Общий чат</span></div></div>
-    </div>
+    <!-- ЧАТЫ -->
+    <div id="screen-chats" class="content active">
+        <div id="chat-list">
+            <h2>Чаты</h2>
+            <div class="chat-item" onclick="openChat('ai')">
+                <div class="avatar" style="background: linear-gradient(135deg, #1e3a8a, #38bdf8);">🤖</div>
+                <div class="chat-info"><div class="chat-name">@ai</div><div class="chat-desc">ИИ-помощник</div></div>
+            </div>
+            <div class="chat-item" onclick="openChat('all')">
+                <div class="avatar" style="background: linear-gradient(135deg, #b45309, #fbbf24);">🌍</div>
+                <div class="chat-info"><div class="chat-name">@all</div><div class="chat-desc">Общий чат</div></div>
+            </div>
+        </div>
 
-    <div id="screen-gifts" class="content" style="display:none;">
-        <h3>Магазин подарков</h3>
-        <div class="gift-grid">
-            <div class="gift-card"><div style="font-size:30px;">❤️</div>Сердце<br>50 💎</div>
-            <div class="gift-card"><div style="font-size:30px;">🌹</div>Роза<br>120 💎</div>
-            <div class="gift-card"><div style="font-size:30px;">👑</div>Корона<br>250 💎</div>
+        <div id="chat-room" style="display: none; flex-direction: column; height: 100%;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-blue); padding-bottom: 10px;">
+                <button onclick="closeChat()" style="background: none; border: none; color: var(--accent-blue); font-size: 24px; cursor: pointer;">←</button>
+                <h3 id="chat-title" style="margin: 0;">Чат</h3>
+            </div>
+            <div id="messagesBox"></div>
+            <div class="chat-input-area">
+                <input type="text" id="msgInput" class="chat-input" placeholder="Сообщение...">
+                <button onclick="sendMessage()" class="send-btn">➤</button>
+            </div>
         </div>
     </div>
 
-    <div id="screen-profile" class="content" style="display:none;">
-        <h3>Профиль</h3>
-        <p>@username</p>
-        <button class="btn">Ввести админ-ключ</button>
-        <button class="btn" style="background:#1e293b;">Сменить аккаунт</button>
+    <!-- ПОДАРКИ -->
+    <div id="screen-gifts" class="content">
+        <h2>Магазин</h2>
+        <div class="gift-grid">
+            <div class="gift-card"><div class="badge market">Market</div><div class="gift-icon">❤️</div><div class="gift-name">Сердце</div><div class="gift-price">💎 50</div></div>
+            <div class="gift-card"><div class="badge market">Market</div><div class="gift-icon">🌹</div><div class="gift-name">Роза</div><div class="gift-price">💎 120</div></div>
+            <div class="gift-card"><div class="badge market">Market</div><div class="gift-icon">👑</div><div class="gift-name">Корона</div><div class="gift-price">💎 250</div></div>
+        </div>
     </div>
 
+    <!-- ПРОФИЛЬ -->
+    <div id="screen-profile" class="content">
+        <h2>Профиль</h2>
+        <div class="chat-item" style="justify-content: center; flex-direction: column; text-align: center; padding: 30px;">
+            <div class="avatar" style="width: 80px; height: 80px; font-size: 40px; margin-bottom: 15px;">👤</div>
+            <div class="chat-name" style="font-size: 20px;">@yoron_user</div>
+            <div class="chat-desc" style="margin-top: 5px;">Баланс: 💎 <span id="profileBalance">0</span> Crystal</div>
+        </div>
+        <button style="width: 100%; padding: 15px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-blue); color: white; font-weight: 600; margin-top: 20px; cursor: pointer;">Ввести админ-ключ</button>
+    </div>
+
+    <!-- НАВИГАЦИЯ -->
     <div class="nav">
-        <div id="nav-chats" class="active" onclick="switchTab('chats')">💬<br>Чаты</div>
-        <div id="nav-gifts" onclick="switchTab('gifts')">🎁<br>Подарки</div>
-        <div id="nav-collection" onclick="switchTab('collection')">💎<br>Коллекция</div>
-        <div id="nav-profile" onclick="switchTab('profile')">👤<br>Профиль</div>
+        <div id="nav-chats" class="nav-item active" onclick="switchTab('chats')"><div class="icon">💬</div>Чаты</div>
+        <div id="nav-gifts" class="nav-item" onclick="switchTab('gifts')"><div class="icon">🎁</div>Подарки</div>
+        <div id="nav-profile" class="nav-item" onclick="switchTab('profile')"><div class="icon">👤</div>Профиль</div>
     </div>
 </div>
 
-<script>
-    function switchTab(tab) {
-        document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.nav div').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById('screen-' + tab).style.display = 'block';
-        document.getElementById('nav-' + tab).classList.add('active');
-    }
+<!-- ПОДКЛЮЧАЕМ FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBghMQlLcZxnxn9k7X5MkivFD8pIA2tDLE",
+    authDomain: "yoron-messenger.firebaseapp.com",
+    databaseURL: "https://yoron-messenger-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "yoron-messenger",
+    storageBucket: "yoron-messenger.firebasestorage.app",
+    messagingSenderId: "197415382088",
+    appId: "1:197415382088:web:d8f26bcbf8cef7bbfd7c7d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  
+  window.db = db;
+  window.dbRef = ref;
+  window.dbPush = push;
+  window.dbOnValue = onValue;
+
+  // Переключение вкладок
+  window.switchTab = function(tab) {
+      document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('screen-' + tab).classList.add('active');
+      document.getElementById('nav-' + tab).classList.add('active');
+  }
+
+  // Логика чата
+  let currentChat = 'all';
+  let currentUser = 'user_' + Math.floor(Math.random() * 1000); // Временный ник
+
+  window.openChat = function(chatName) {
+      currentChat = chatName;
+      document.getElementById('chat-title').innerText = chatName === 'ai' ? '@ai (ИИ)' : '@all (Общий)';
+      document.getElementById('chat-list').style.display = 'none';
+      document.getElementById('chat-room').style.display = 'flex';
+      loadMessages();
+  }
+
+  window.closeChat = function() {
+      document.getElementById('chat-list').style.display = 'block';
+      document.getElementById('chat-room').style.display = 'none';
+  }
+
+  function loadMessages() {
+      const messagesBox = document.getElementById('messagesBox');
+      messagesBox.innerHTML = '';
+      const chatRef = window.dbRef(window.db, 'chats/' + currentChat);
+      
+      window.dbOnValue(chatRef, (snapshot) => {
+          messagesBox.innerHTML = '';
+          snapshot.forEach((child) => {
+              const msg = child.val();
+              const isMine = msg.sender === currentUser;
+              messagesBox.innerHTML += `<div class="msg ${isMine ? 'mine' : 'theirs'}">
+                  <div class="msg-sender">${isMine ? 'Вы' : msg.sender}</div>
+                  ${msg.text}
+              </div>`;
+          });
+          messagesBox.scrollTop = messagesBox.scrollHeight;
+      });
+  }
+
+  window.sendMessage = function() {
+      const input = document.getElementById('msgInput');
+      const text = input.value.trim();
+      if (text !== '') {
+          const chatRef = window.dbRef(window.db, 'chats/' + currentChat);
+          window.dbPush(chatRef, {
+              text: text,
+              sender: currentUser,
+              time: Date.now()
+          });
+          input.value = '';
+          
+          if (currentChat === 'ai') {
+              setTimeout(() => {
+                  window.dbPush(chatRef, {
+                      text: 'Привет! Я ИИ-помощник Yoron. Чем могу помочь?',
+                      sender: '🤖 @ai',
+                      time: Date.now()
+                  });
+              }, 1000);
+          }
+      }
+  }
+
+  if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+  }
 </script>
 </body>
 </html>
