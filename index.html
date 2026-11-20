@@ -50,7 +50,7 @@
         .chat-input { flex: 1; padding: 15px; border-radius: 15px; background: var(--bg-card); border: 1px solid var(--border-blue); color: white; outline: none; }
         .send-btn { background: var(--accent-blue); color: black; border: none; padding: 0 20px; border-radius: 15px; font-weight: bold; font-size: 20px; cursor: pointer; }
 
-        /* Магазин (Подарки) */
+        /* Магазин */
         .gift-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
         .gift-tab { background: var(--bg-card); border: 1px solid var(--border-blue); padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; white-space: nowrap; }
         .gift-tab.active { background: var(--accent-blue); color: black; border-color: var(--accent-blue); font-weight: bold; }
@@ -92,11 +92,11 @@
             <p style="color: var(--text-muted); margin-bottom: 30px;">Общайся. Создавай. Вдохновляй.</p>
             <input type="text" id="regUsername" class="auth-input" placeholder="@username">
             <input type="password" id="regPassword" class="auth-input" placeholder="Пароль (мин. 6 символов)">
-            <button onclick="registerUser()" class="auth-btn" id="btn-register">Создать аккаунт</button>
-            <button onclick="loginUser()" class="auth-btn" id="btn-login" style="display: none;">Войти</button>
+            <button id="btn-register" class="auth-btn">Создать аккаунт</button>
+            <button id="btn-login" class="auth-btn" style="display: none;">Войти</button>
             <p style="margin-top: 20px; font-size: 14px;">
                 <span id="auth-toggle-text">Уже есть аккаунт?</span> 
-                <span style="color: var(--accent-blue); cursor: pointer; text-decoration: underline;" onclick="toggleAuthMode()" id="auth-toggle-link">Войти</span>
+                <span style="color: var(--accent-blue); cursor: pointer; text-decoration: underline;" id="auth-toggle-link">Войти</span>
             </p>
         </div>
     </div>
@@ -112,11 +112,11 @@
         <div id="tab-chats" class="content active">
             <div id="chat-list">
                 <h2>Чаты</h2>
-                <div class="chat-item" onclick="openChat('ai')">
+                <div class="chat-item" id="chat-btn-ai">
                     <div class="avatar" style="background: linear-gradient(135deg, #1e3a8a, #38bdf8);">🤖</div>
                     <div><div style="font-weight: bold;">@ai</div><div style="color: var(--text-muted); font-size: 13px;">ИИ-помощник</div></div>
                 </div>
-                <div class="chat-item" onclick="openChat('all')">
+                <div class="chat-item" id="chat-btn-all">
                     <div class="avatar" style="background: linear-gradient(135deg, #b45309, #fbbf24);">🌍</div>
                     <div><div style="font-weight: bold;">@all</div><div style="color: var(--text-muted); font-size: 13px;">Общий чат</div></div>
                 </div>
@@ -124,13 +124,13 @@
 
             <div id="chat-room" style="display: none; flex-direction: column; height: 100%;">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-blue); padding-bottom: 10px;">
-                    <button onclick="closeChat()" style="background: none; border: none; color: var(--accent-blue); font-size: 24px; cursor: pointer;">←</button>
+                    <button id="btn-close-chat" style="background: none; border: none; color: var(--accent-blue); font-size: 24px; cursor: pointer;">←</button>
                     <h3 id="chat-title" style="margin: 0;">Чат</h3>
                 </div>
                 <div id="messagesBox"></div>
                 <div class="chat-input-area">
                     <input type="text" id="msgInput" class="chat-input" placeholder="Сообщение...">
-                    <button onclick="sendMessage()" class="send-btn">➤</button>
+                    <button id="btn-send-msg" class="send-btn">➤</button>
                 </div>
             </div>
         </div>
@@ -171,18 +171,19 @@
                 <h2 style="margin: 0;" id="profileUsername">@...</h2>
                 <p style="color: var(--text-muted); margin-top: 5px;">Баланс: 💎 <span id="profileBalance">0</span> Crystal</p>
             </div>
-            <button onclick="logoutUser()" style="width: 100%; padding: 15px; border-radius: 12px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; font-weight: bold; cursor: pointer;">Выйти из аккаунта</button>
+            <button id="btn-logout" style="width: 100%; padding: 15px; border-radius: 12px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; font-weight: bold; cursor: pointer;">Выйти из аккаунта</button>
         </div>
 
         <!-- НАВИГАЦИЯ -->
         <div class="nav">
-            <div id="nav-chats" class="nav-item active" onclick="switchTab('chats')"><div class="icon">💬</div>Чаты</div>
-            <div id="nav-gifts" class="nav-item" onclick="switchTab('gifts')"><div class="icon">🎁</div>Подарки</div>
-            <div id="nav-profile" class="nav-item" onclick="switchTab('profile')"><div class="icon">👤</div>Профиль</div>
+            <div id="nav-chats" class="nav-item active"><div class="icon">💬</div>Чаты</div>
+            <div id="nav-gifts" class="nav-item"><div class="icon">🎁</div>Подарки</div>
+            <div id="nav-profile" class="nav-item"><div class="icon">👤</div>Профиль</div>
         </div>
     </div>
 </div>
 
+<!-- Подключение Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -201,69 +202,83 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getDatabase(app);
-  
-  window.db = db;
-  window.dbRef = ref;
-  window.dbPush = push;
-  window.dbOnValue = onValue;
 
   let isLoginMode = false;
   let currentUser = "";
 
-  window.toggleAuthMode = function() {
-      isLoginMode = !isLoginMode;
-      document.getElementById('btn-register').style.display = isLoginMode ? 'none' : 'block';
-      document.getElementById('btn-login').style.display = isLoginMode ? 'block' : 'none';
-      document.getElementById('auth-toggle-text').innerText = isLoginMode ? 'Нет аккаунта?' : 'Уже есть аккаунт?';
-      document.getElementById('auth-toggle-link').innerText = isLoginMode ? 'Создать' : 'Войти';
-  }
-
-  window.registerUser = async function() {
-      const username = document.getElementById('regUsername').value.trim();
-      const password = document.getElementById('regPassword').value;
+  // --- ИНИЦИАЛИЗАЦИЯ ВСЕХ КНОПОК И СОБЫТИЙ (Ждем загрузки DOM) ---
+  document.addEventListener('DOMContentLoaded', () => {
       
-      if (!username || !password) return alert('Заполните все поля!');
-      if (password.length < 6) return alert('Пароль должен быть минимум 6 символов!');
-      
-      const email = username.replace('@', '') + '@yoron.com';
-
-      try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-
-          await set(ref(db, 'users/' + user.uid), { username: username, balance: 0, inventory: [] });
-          alert('Аккаунт создан!');
-          showApp(username, 0);
-      } catch (error) {
-          alert('Ошибка: ' + error.message);
-      }
-  }
-
-  window.loginUser = async function() {
-      const username = document.getElementById('regUsername').value.trim();
-      const password = document.getElementById('regPassword').value;
-      const email = username.replace('@', '') + '@yoron.com';
-
-      try {
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-          const snapshot = await get(ref(db, 'users/' + user.uid));
-          if (snapshot.exists()) {
-              const data = snapshot.val();
-              showApp(data.username, data.balance);
-          }
-      } catch (error) {
-          alert('Неверный логин или пароль');
-      }
-  }
-
-  window.logoutUser = function() {
-      signOut(auth).then(() => {
-          document.getElementById('screen-main').style.display = 'none';
-          document.getElementById('screen-auth').classList.add('active');
+      // 1. ПЕРЕКЛЮЧЕНИЕ ВХОД/РЕГИСТРАЦИЯ
+      document.getElementById('auth-toggle-link').addEventListener('click', () => {
+          isLoginMode = !isLoginMode;
+          document.getElementById('btn-register').style.display = isLoginMode ? 'none' : 'block';
+          document.getElementById('btn-login').style.display = isLoginMode ? 'block' : 'none';
+          document.getElementById('auth-toggle-text').innerText = isLoginMode ? 'Нет аккаунта?' : 'Уже есть аккаунт?';
+          document.getElementById('auth-toggle-link').innerText = isLoginMode ? 'Создать' : 'Войти';
       });
-  }
 
+      // 2. РЕГИСТРАЦИЯ
+      document.getElementById('btn-register').addEventListener('click', async () => {
+          const username = document.getElementById('regUsername').value.trim();
+          const password = document.getElementById('regPassword').value;
+          
+          if (!username || !password) return alert('Заполните все поля!');
+          if (password.length < 6) return alert('Пароль должен быть минимум 6 символов!');
+          
+          const email = username.replace('@', '') + '@yoron.com';
+
+          try {
+              const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+              await set(ref(db, 'users/' + userCredential.user.uid), { username: username, balance: 0, inventory: [] });
+              alert('Аккаунт создан!');
+              showApp(username, 0);
+          } catch (error) {
+              alert('Ошибка регистрации: ' + error.message);
+          }
+      });
+
+      // 3. ВХОД
+      document.getElementById('btn-login').addEventListener('click', async () => {
+          const username = document.getElementById('regUsername').value.trim();
+          const password = document.getElementById('regPassword').value;
+          const email = username.replace('@', '') + '@yoron.com';
+
+          try {
+              const userCredential = await signInWithEmailAndPassword(auth, email, password);
+              const snapshot = await get(ref(db, 'users/' + userCredential.user.uid));
+              if (snapshot.exists()) {
+                  showApp(snapshot.val().username, snapshot.val().balance);
+              }
+          } catch (error) {
+              alert('Неверный логин или пароль');
+          }
+      });
+
+      // 4. ВЫХОД
+      document.getElementById('btn-logout').addEventListener('click', () => {
+          signOut(auth).then(() => {
+              document.getElementById('screen-main').style.display = 'none';
+              document.getElementById('screen-auth').classList.add('active');
+              // Очищаем поля при выходе
+              document.getElementById('regUsername').value = '';
+              document.getElementById('regPassword').value = '';
+          });
+      });
+
+      // 5. НАВИГАЦИЯ (НИЖНЕЕ МЕНЮ)
+      document.getElementById('nav-chats').addEventListener('click', () => switchTab('chats'));
+      document.getElementById('nav-gifts').addEventListener('click', () => switchTab('gifts'));
+      document.getElementById('nav-profile').addEventListener('click', () => switchTab('profile'));
+
+      // 6. ЧАТЫ
+      document.getElementById('chat-btn-ai').addEventListener('click', () => openChat('ai'));
+      document.getElementById('chat-btn-all').addEventListener('click', () => openChat('all'));
+      document.getElementById('btn-close-chat').addEventListener('click', closeChat);
+      document.getElementById('btn-send-msg').addEventListener('click', sendMessage);
+  });
+
+  // ФУНКЦИИ
   function showApp(username, balance) {
       currentUser = username;
       document.getElementById('screen-auth').classList.remove('active');
@@ -273,51 +288,24 @@
       document.getElementById('profileBalance').innerText = balance;
   }
 
-  window.switchTab = function(tab) {
+  function switchTab(tab) {
       document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + tab).classList.add('active');
       document.getElementById('nav-' + tab).classList.add('active');
   }
 
-  // ЛОГИКА ЧАТА И ИИ
+  // Логика чата
   let currentChat = 'all';
 
-  window.openChat = function(chatName) {
+  function openChat(chatName) {
       currentChat = chatName;
       document.getElementById('chat-title').innerText = chatName === 'ai' ? '@ai (ИИ)' : '@all (Общий)';
       document.getElementById('chat-list').style.display = 'none';
       document.getElementById('chat-room').style.display = 'flex';
-      loadMessages();
-  }
-
-  window.closeChat = function() {
-      document.getElementById('chat-list').style.display = 'block';
-      document.getElementById('chat-room').style.display = 'none';
-  }
-
-  function loadMessages() {
+      
       const messagesBox = document.getElementById('messagesBox');
       messagesBox.innerHTML = '';
-      const chatRef = window.dbRef(window.db, 'chats/' + currentChat);
       
-      window.dbOnValue(chatRef, (snapshot) => {
-          messagesBox.innerHTML = '';
-          snapshot.forEach((child) => {
-              const msg = child.val();
-              const isMine = msg.sender === currentUser;
-              messagesBox.innerHTML += `<div class="msg ${isMine ? 'mine' : 'theirs'}">
-                  <div style="font-size: 10px; font-weight: bold; opacity: 0.7; margin-bottom: 3px;">${isMine ? 'Вы' : msg.sender}</div>
-                  ${msg.text}
-              </div>`;
-          });
-          messagesBox.scrollTop = messagesBox.scrollHeight;
-      });
-  }
-
-  window.sendMessage = function() {
-      const input = document.getElementById('msgInput');
-      const text = input.value.trim();
-      if (text !== '') {
-          const chatRef = window.dbRef(window.db, 'chats/' + currentChat);
-          window.dbPush(chatRef, { text: text, sender: currentUs
+      const chatRef = ref(db, 'chats/' + currentChat);
+      onValue
